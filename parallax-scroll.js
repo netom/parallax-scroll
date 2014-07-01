@@ -70,7 +70,7 @@ PS.init = function () {
     $(window).resize(PS.adjustBackgrounds);
     $(window).scroll(PS.adjustBackgrounds);
 
-    //PS.adjustBackgrounds();
+    setTimeout(PS.adjustBackgrounds, 0);
 };
 
 $(document).ready(function () {
