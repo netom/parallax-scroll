@@ -42,20 +42,26 @@ PS.getMargin = function (po) {
     return -Math.round(pv * PS.getFreedom(po))
 };
 
-PS.adjustBackgrounds = function () {
+PS.adjustImage = function (po) {
+    var pw = po.img.parent().width();
+
+    if (pw > po.minWidth && po.img.width() != pw) {
+        var r = po.img.height() / po.img.width();
+        po.img.width(pw);
+        po.img.height(pw * r);
+    }
+
+    var pv = PS.getPV(po);
+
+    if (pv <= 1 && pv >= 0) {
+        po.margin = PS.getMargin(po, pv);
+        po.img.css({"transform": "translate3d(0px," + po.margin + "px,0px)"});
+    }
+}
+
+PS.adjustImages = function () {
     PS.pobjs.each(function (i, po) {
-        var pw = po.img.parent().width();
-
-        if (pw > po.minWidth && po.img.width() != pw) {
-            po.img.width(pw);
-        }
-
-        var pv = PS.getPV(po);
-
-        if (pv <= 1 && pv >= 0) {
-            po.margin = PS.getMargin(po, pv);
-            po.img.css({"transform": "translate3d(0px," + po.margin + "px,0px)"});
-        }
+        PS.adjustImage(po);
     });
 };
 
@@ -78,21 +84,21 @@ PS.init = function () {
         jqpelement.height(po.height);
 
         var i = new Image();
-        i.src = po.imgsrc;
+        i.onload = function() {
+            PS.adjustImage(po);
+        };
 
-        //po.img = $(document.createElement("img"));
-        //po.img.attr("src", po.imgsrc);
         po.img = $(i);
 
         jqpelement.append(po.img);
 
         PS.pobjs.push(po);
+
+        i.src = po.imgsrc;
     });
 
-    PS.jqw.resize(PS.adjustBackgrounds);
-    PS.jqw.scroll(function (e) {e.preventDefault(); PS.adjustBackgrounds()});
-    
-    PS.adjustBackgrounds();
+    PS.jqw.resize(PS.adjustImages);
+    PS.jqw.scroll(function (e) {e.preventDefault(); PS.adjustImages()});
 };
 
 $(document).ready(function () {
